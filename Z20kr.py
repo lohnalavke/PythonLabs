@@ -33,3 +33,22 @@ with open("зачёт.txt", "w") as f:
         
         f.write(f"{surname}\t{name}\t{otch}\t{birth}\t{grade}\n")
 print("Файл зачёт.txt записан")
+
+print("=== Пункт 4 ===")
+search_surname = input("Введите фамилию учащегося для поиска оценки: ")
+
+found = False
+with open('Зачёт.txt', 'r') as f:
+    for line in f:
+        parts = line.strip().split('\t')
+        if len(parts) < 5:
+            continue  
+        surname = parts[0]
+        if surname == search_surname:
+            grade = parts[4]  # оценка — пятый столбец
+            print(f"Оценка учащегося {surname}: {grade}")
+            found = True
+            break
+if not found:
+    print("Учащийся с такой фамилией не найден.")
+print()
