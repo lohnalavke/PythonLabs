@@ -51,4 +51,35 @@ with open('Зачёт.txt', 'r') as f:
             break
 if not found:
     print("Учащийся с такой фамилией не найден.")
-print()
+
+print("=== Пункт 5 ===")
+with open('EEG.txt', 'w') as f:
+    for i in range(1, 6):
+        row = [str(i * j) for j in range(1, 17)]  # генерируем числа
+        f.write('\t'.join(row) + '\n')
+print("Тестовый файл EEG.txt создан.")
+
+try:
+    channel = int(input("Введите номер отведения (1–16): "))
+    if channel < 1 or channel > 16:
+        print("Номер должен быть от 1 до 16.")
+    else:
+        values = []
+        with open('EEG.txt', 'r') as f:
+            for line in f:
+                parts = line.strip().split('\t')
+                if len(parts) >= channel:
+                    try:
+                        val = float(parts[channel-1])
+                    except ValueError:
+                        val = parts[channel-1]  # если не число, сохраняем как строку
+                    values.append(val)
+                base = os.path.splitext('EEG.txt')[0]  # имя без расширения
+        out_filename = f"{base}{channel}.txt"
+        # Записываем значения в новый файл (каждое на новой строке)
+        with open(out_filename, 'w') as f:
+            for v in values:
+                f.write(str(v) + '\n')
+        print(f"Отведение {channel} сохранено в файл {out_filename}")
+except ValueError:
+    print("Некорректный ввод.")
