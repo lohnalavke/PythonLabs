@@ -1,50 +1,43 @@
 import os
-import matplotlib.pyplot as
+import matplotlib.pyplot as plt
 
-folder = "Распределения"
+folder = 'Распределения'
 if not os.path.exists(folder):
-    print(f"Папка '{folder}' не найдена. Сначала запустите первую программу.")
-    
-os.chdir(folder)
-files = os.listdir(".")
-
-txt_files = [f for f in files if f.endswith(".txt")]
-
-if not txt_files:
-    print("В папке нет текстовых файлов.")
+    print(f'Ошибка: папка "{folder}" не найдена.')
     exit()
 
-# Для каждого текстового файла строим гистограмму
-for filename in txt_files:
-    # Читаем числа из файла
-    with open(filename, "r", encoding="utf-8") as f:
-        # Преобразуем каждую строку в число, пропуская пустые строки
-        data = []
-        for line in f:
-            line = line.strip()
-            if line:
-                try:
-                    data.append(float(line))
-                except ValueError:
-                    print(f"Предупреждение: в файле {filename} некорректная строка: {line}")
+os.chdir(folder)
 
-    if not data:
-        print(f"Файл {filename} не содержит чисел, пропускаем.")
+# Настройка шрифта для поддержки кириллицы
+plt.rcParams['font.sans-serif'] = ['Arial', 'Liberation Sans']
+
+# Обрабатываем все файлы с расширением .txt
+for filename in os.listdir('.'):
+    if not filename.endswith('.txt'):
         continue
 
+    # Читаем данные из файла
+    data = []
+    with open(filename, 'r') as f:
+        for line in f:
+            line = line.strip()
+            if line:  # пропускаем пустые строки
+                data.append(float(line))
+
+    # Определяем имя для сохранения графика (без расширения .txt)
+    base_name = os.path.splitext(filename)[0]
+    output_file = base_name + '.png'
+
     # Строим гистограмму
-    plt.figure(figsize=(6, 4))
-    plt.hist(data, bins=30, edgecolor='black', alpha=0.7, color='skyblue')
-    plt.title(f"Гистограмма распределения\n{filename}")
-    plt.xlabel("Значение")
-    plt.ylabel("Частота")
+    plt.figure()
+    plt.title(f'Распределение: {base_name}')
+    plt.xlabel('Значение')
+    plt.ylabel('Плотность вероятности')
+    plt.hist(data, bins=30, density=True, alpha=0.7, color='blue', edgecolor='black')
     plt.grid(True, linestyle='--', alpha=0.5)
+    plt.savefig(output_file, dpi=150)
+    plt.close()  # закрываем фигуру, чтобы не накладывались
 
-    # Формируем имя для сохранения (меняем расширение на .png)
-    base = os.path.splitext(filename)[0]
-    out_image = base + ".png"
-    plt.savefig(out_image, dpi=150)
-    plt.close() # закрываем фигуру, чтобы не занимать память
-    print(f"Гистограмма для {filename} сохранена как {out_image}")
+    print(f'График сохранён: {output_file}')
 
-print("Готово.")
+print('Все гистограммы построены.')

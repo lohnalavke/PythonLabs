@@ -1,5 +1,6 @@
 import math
 import os
+import random
 
 print("=== №1 ===")
 with open('numbers.txt', 'w') as f:
@@ -53,33 +54,37 @@ if not found:
     print("Учащийся с такой фамилией не найден.")
 
 print("=== Пункт 5 ===")
-with open('EEG.txt', 'w') as f:
-    for i in range(1, 6):
-        row = [str(i * j) for j in range(1, 17)]  # генерируем числа
-        f.write('\t'.join(row) + '\n')
-print("Тестовый файл EEG.txt создан.")
+num_channels = 16
+num_points = 500  # количество отсчётов
+time_step = 0.01  # шаг по времени (условный)
 
-try:
-    channel = int(input("Введите номер отведения (1–16): "))
-    if channel < 1 or channel > 16:
-        print("Номер должен быть от 1 до 16.")
-    else:
-        values = []
-        with open('EEG.txt', 'r') as f:
-            for line in f:
-                parts = line.strip().split('\t')
-                if len(parts) >= channel:
-                    try:
-                        val = float(parts[channel-1])
-                    except ValueError:
-                        val = parts[channel-1]  # если не число, сохраняем как строку
-                    values.append(val)
-                base = os.path.splitext('EEG.txt')[0]  # имя без расширения
-        out_filename = f"{base}{channel}.txt"
-        # Записываем значения в новый файл (каждое на новой строке)
-        with open(out_filename, 'w') as f:
-            for v in values:
-                f.write(str(v) + '\n')
-        print(f"Отведение {channel} сохранено в файл {out_filename}")
-except ValueError:
-    print("Некорректный ввод.")
+with open('EEG.txt', 'w') as f:
+    for i in range(num_points):
+        t = i * time_step
+        row = []
+        for ch in range(num_channels):
+            # Генерируем сигнал, похожий на ЭЭГ: сумма синусоид + шум
+            # У каждого канала своя частота и фаза
+            freq = 5 + ch * 0.7  # разные частоты для каналов
+            phase = ch * 0.3
+            value = (math.sin(2 * math.pi * freq * t + phase) * 10 +
+                     random.gauss(0, 2))  # небольшой шум
+            row.append(f'{value:.6f}')
+        f.write('\t'.join(row) + '\n')
+
+print('Файл EEG.txt создан.')
+
+channel = int(input('Введите номер отведения (0..15): '))
+source_file = 'EEG.txt'
+base_name = os.path.splitext(source_file)[0]
+target_file = f'{base_name}_{channel}.txt'
+
+with open(source_file, 'r') as fr, open(target_file, 'w') as fw:
+    for line in fr:
+        columns = line.strip().split('\t')
+        if len(columns) > channel:
+            fw.write(columns[channel] + '\n')
+        else:
+            fw.write('\n')  # на случай неполной строки
+
+print(f'Отведение {channel} сохранено в файл {target_file}')
